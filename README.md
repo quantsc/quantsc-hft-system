@@ -25,7 +25,7 @@ Currently, the next steps for the project are the following:
     - Executing Market buy
     - Executing Market sell
 - [ ] “Best” buy function
-- [ ] Num of sell/buys
+- [ ] Num of sell/buys (volume)
 - [ ] Check if a given order is in the order book
 - [ ] Matching algorithm
     - Naive random
