@@ -1,12 +1,15 @@
 #pragma once
 #include <string>
+#include "Stock.h"
+
+enum OrderType { Buy, Sell, LimitBuy, LimitSell };
 
 class Order {
     private:
         int orderId;
         int userId;
         std::string ticker;
-        bool isBuy;
+        OrderType orderType;
         int price;
         int volume;
         int timestamp;
@@ -16,10 +19,9 @@ class Order {
         Order(
             int orderId,
             int userId,
-            std::string ticker,
-            std::string companyName,
             bool isBuy,
             int price,
+			Stock stock,
             int volume,
             int timestamp
         );
