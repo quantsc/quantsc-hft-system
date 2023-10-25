@@ -12,6 +12,7 @@ public:
 
     // Method for displaying the order book
     void displayOrderBook();
+    void findOrderinBook(Order& order);
 
 private:
     std::queue<Order> pendingOrders;
