@@ -56,7 +56,7 @@ void OrderBook::displayOrderBook() {
 void OrderBook::findOrderinBook(Order& order) {
     for(Order order : executed)
     {
-        // maybe add a print function to order so we can display nicely
+        // maybe add a search function
     }
 }
 
