@@ -11,9 +11,11 @@ class Order {
         int price;
         int volume;
         int timestamp;
+		
 
     public:
         enum class IsBuy{Buy, Sell, LimitBuy, LimitSell};
+		bool cancelled;
 
         // Constructor
         Order(
