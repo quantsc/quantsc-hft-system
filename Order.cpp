@@ -20,7 +20,7 @@ Order::Order(
     this->timestamp = timestamp;
 }
 
-int Order::getOrderId() {
+int Order::getOrderId() const {
     return this->orderId;
 }
 

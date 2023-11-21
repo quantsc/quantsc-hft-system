@@ -39,13 +39,13 @@ private:
 
     struct CompareLimitSellPrice {
         bool operator()(const Order* a, const Order* b) const {
-            return a->price > b->price;
+            return a->getPrice() > b->getPrice();
         }
     };
 
     struct CompareLimitBuyPrice {
         bool operator()(const Order* a, const Order* b) const {
-            return a->price < b->price;
+            return a->getPrice() < b->getPrice();
         }
     };
 

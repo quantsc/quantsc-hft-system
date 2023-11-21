@@ -20,7 +20,7 @@ void OrderBook::addPendingOrder(Order& order) {
 void OrderBook::executeTrades() {
     while (!pendingOrders.empty()) {
 		if (pendingOrders.front().cancelled) {
-			pendingOrdersMap.erase(pendingOrders.front().orderId);
+			pendingOrdersMap.erase(pendingOrders.front().getOrderId());
 			pendingOrders.pop();
 		}
         if(!(pendingOrders.front().getIsBuy()==Order::IsBuy::Buy) || (pendingOrders.front().getIsBuy()==Order::IsBuy::LimitBuy && pendingOrders.front().getPrice()==2/*price to buy/sell at specified by isLimit order, not sure if this is should be in  order class or here*/))
@@ -36,7 +36,7 @@ void OrderBook::executeTrades() {
             }
             executed.push_back(pendingOrders.front());
             //maybe save info like time of execution?
-			pendingOrdersMap.erase(pendingOrders.front().orderId);
+			pendingOrdersMap.erase(pendingOrders.front().getOrderId());
             pendingOrders.pop();
         }
         if(!(pendingOrders.front().getIsBuy()==Order::IsBuy::Sell) || (pendingOrders.front().getIsBuy()==Order::IsBuy::LimitSell && pendingOrders.front().getPrice()==2/*price to buy/sell at specified by isLimit order, not sure if this is should be in  order class or here*/))
@@ -52,7 +52,7 @@ void OrderBook::executeTrades() {
             }
             executed.push_back(pendingOrders.front());
             //maybe save info like time of execution?
-			pendingOrdersMap.erase(pendingOrders.front().orderId);
+			pendingOrdersMap.erase(pendingOrders.front().getOrderId());
             pendingOrders.pop();
         }
     }
@@ -74,8 +74,8 @@ void OrderBook::findOrderinBook(Order& order) {
 
 // SORT FUNCTION FOR ITERATION BY PRICE
 struct OrderComparator {
-    bool operator()(const Order& a, const Order& b) const {
-        return a.price > b.price; // Compare prices in ascending order
+    bool operator()(Order& a, Order& b) {
+        return a.getPrice() > b.getPrice(); // Compare prices in ascending order
     }
 };
 
