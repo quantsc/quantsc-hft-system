@@ -2,7 +2,21 @@
 #include <string>
 
 class Order {
-    private:
+    /*private:
+        int orderId;
+        int userId;
+        std::string ticker;
+        std::string companyName;
+        //enum IsBuy{Buy, Sell, LimitBuy, LimitSell};
+        int price;
+        int volume;
+        int timestamp;*/
+		
+
+    public:
+        enum class IsBuy{Buy, Sell, LimitBuy, LimitSell};
+		bool cancelled;
+
         int orderId;
         int userId;
         std::string ticker;
@@ -11,11 +25,6 @@ class Order {
         int price;
         int volume;
         int timestamp;
-		
-
-    public:
-        enum class IsBuy{Buy, Sell, LimitBuy, LimitSell};
-		bool cancelled;
 
         // Constructor
         Order(

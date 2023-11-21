@@ -1,4 +1,5 @@
 #include "OrderBook.h"
+#include <string>
 #include <queue>
 #include <vector>
 #include <chrono>
@@ -31,6 +32,7 @@ void OrderBook::executeTrades() {
             else
             {
                 //actual execution to buy, limit
+                buyPriorityQueue.push(&pendingOrders.front());
             }
             executed.push_back(pendingOrders.front());
             //maybe save info like time of execution?
@@ -46,6 +48,7 @@ void OrderBook::executeTrades() {
             else
             {
                 //actual execution to sell, limit
+                sellPriorityQueue.push(&pendingOrders.front());
             }
             executed.push_back(pendingOrders.front());
             //maybe save info like time of execution?
@@ -69,10 +72,55 @@ void OrderBook::findOrderinBook(Order& order) {
     }
 }
 
-void OrderBook::findOrderInBookByOrderId(int orderId) {
-    
+// SORT FUNCTION FOR ITERATION BY PRICE
+struct OrderComparator {
+    bool operator()(const Order& a, const Order& b) const {
+        return a.price > b.price; // Compare prices in ascending order
+    }
+};
+
+std::queue<Order> sortByPrice(const std::queue<Order>& pendingOrders) {
+    std::priority_queue<Order, std::vector<Order>, OrderComparator> pq;
+
+    std::queue<Order> tempQueue = pendingOrders;
+    while (!tempQueue.empty()) {
+        pq.push(tempQueue.front());
+        tempQueue.pop();
+    }
+
+    std::queue<Order> sortedPricePendingOrders;
+    while (!pq.empty()) {
+        sortedPricePendingOrders.push(pq.top());
+        pq.pop();
+    }
+
+    return sortedPricePendingOrders;
 }
 
+//CONSTANT LOOKUP BY ORDER ID
+Order* OrderBook::findOrderInBookByOrderId(int orderId) {
+    auto it = pendingOrdersMap.find(orderId);
+    if (it != pendingOrdersMap.end()) {
+        return it->second;
+    } else {
+        
+    }
+}
+
+//CONSTANT FIND BEST BID AND ASK OF LIMIT ORDERS
+Order* OrderBook::findLowestSell() {
+    if (!sellPriorityQueue.empty()) {
+        return sellPriorityQueue.top();
+    }
+    return nullptr;
+}
+
+Order* OrderBook::findHighestBuy() {
+    if (!buyPriorityQueue.empty()) {
+        return buyPriorityQueue.top();
+    }
+    return nullptr;
+}
 
 uint64_t timeSinceEpochMillisec() {
   using namespace std::chrono;
@@ -108,7 +156,7 @@ void OrderBook::editOrder(int id, string ticker, string companyName, double pric
 			pendingOrdersMap[id]->setTicker(ticker);
 			pendingOrdersMap[id]->companyName = companyName;
 			pendingOrdersMap[id]->setPrice(price);
-			pendingOrdersMap[id]->setVolume(volume);
+			pendingOrdersMap[id]->setVolume(amount);
 			pendingOrdersMap[id]->setTimestamp(timeSinceEpochMillisec());
 		}
 	}
