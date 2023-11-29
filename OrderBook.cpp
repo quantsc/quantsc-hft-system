@@ -8,7 +8,12 @@
 using namespace std;
 
 OrderBook::OrderBook() {
-
+    this->pendingOrders = std::queue<Order>();
+    this->executed = std::vector<Order>();
+    this->pendingOrdersMap = std::map<int, Order*>();
+    
+    this->buyPriorityQueue = std::priority_queue<Order*, std::vector<Order*>, OrderComparator>();
+    this->sellPriorityQueue = std::priority_queue<Order*, std::vector<Order*>, OrderComparator>();
 }
 
 void OrderBook::addPendingOrder(Order& order) {
@@ -162,6 +167,28 @@ void OrderBook::editOrder(int id, string ticker, string companyName, double pric
 	}
 }
 
-int main() {
-    return 0;
+void OrderBook::matchOrders() {
+    while (!buyPriorityQueue.empty() && !sellPriorityQueue.empty()) {
+        Order* buyOrder = buyPriorityQueue.top();
+        Order* sellOrder = sellPriorityQueue.top();
+
+        if (buyOrder->getPrice() >= sellOrder->getPrice()) {
+            double tradeVolume = min(buyOrder->getVolume(), sellOrder->getVolume());
+
+            executeTrades();
+
+            buyOrder->setVolume(buyOrder->getVolume() - tradeVolume);
+            sellOrder->setVolume(sellOrder->getVolume() - tradeVolume);
+
+            if (buyOrder->getVolume() <= 0) {
+                buyPriorityQueue.pop();
+            }
+
+            if (sellOrder->getVolume() <= 0) {
+                sellPriorityQueue.pop();
+            }
+        } else {
+            break;
+        }
+    }
 }
