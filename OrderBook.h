@@ -1,5 +1,6 @@
 #include "Order.h"
 #include "Stock.h"
+#include <string>
 #include <queue>
 #include <vector>
 #include <map>
@@ -14,14 +15,18 @@ public:
     // Method for displaying the order book
     void displayOrderBook();
     void findOrderinBook(Order& order);
-	void findOrderInBookByOrderId(int orderId);
+	Order* findOrderInBookByOrderId(int orderId);
+    std::queue<Order> sortByPrice();
+    Order* findLowestSell();
+    Order* findHighestBuy();
 
-	void limitBuy(string ticker, string companyName, double price, double amount, int userId);
-	void limitSell(string ticker, string companyName, double price, double amount, int userId);
-	void marketBuy(string ticker, string companyName, double price, double amount, int userId);
-	void marketSell(string ticker, string companyName, double price, double amount, int userId);
+	void limitBuy(std::string ticker, std::string companyName, double price, double amount, int userId);
+	void limitSell(std::string ticker, std::string companyName, double price, double amount, int userId);
+	void marketBuy(std::string ticker, std::string companyName, double price, double amount, int userId);
+	void marketSell(std::string ticker, std::string companyName, double price, double amount, int userId);
 
-	void editOrder(int id, string ticker, string companyName, double price, double amount, int userId, bool bCancel);
+	void editOrder(int id, std::string ticker, std::string companyName, double price, double amount, int userId, bool bCancel);
+
 
 
 private:
@@ -31,4 +36,19 @@ private:
 
     // Helper method for executing trades
     void executeTrades();
+
+    struct CompareLimitSellPrice {
+        bool operator()(const Order* a, const Order* b) const {
+            return a->getPrice() > b->getPrice();
+        }
+    };
+
+    struct CompareLimitBuyPrice {
+        bool operator()(const Order* a, const Order* b) const {
+            return a->getPrice() < b->getPrice();
+        }
+    };
+
+    std::priority_queue<Order*, std::vector<Order*>, CompareLimitSellPrice> sellPriorityQueue;
+    std::priority_queue<Order*, std::vector<Order*>, CompareLimitBuyPrice> buyPriorityQueue;
 };

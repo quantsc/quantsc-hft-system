@@ -1,4 +1,5 @@
 #include "OrderBook.h"
+#include <string>
 #include <queue>
 #include <vector>
 #include <chrono>
@@ -19,7 +20,7 @@ void OrderBook::addPendingOrder(Order& order) {
 void OrderBook::executeTrades() {
     while (!pendingOrders.empty()) {
 		if (pendingOrders.front().cancelled) {
-			pendingOrdersMap.erase(pendingOrders.front().orderId);
+			pendingOrdersMap.erase(pendingOrders.front().getOrderId());
 			pendingOrders.pop();
 		}
         if(!(pendingOrders.front().getIsBuy()==Order::IsBuy::Buy) || (pendingOrders.front().getIsBuy()==Order::IsBuy::LimitBuy && pendingOrders.front().getPrice()==2/*price to buy/sell at specified by isLimit order, not sure if this is should be in  order class or here*/))
@@ -31,10 +32,11 @@ void OrderBook::executeTrades() {
             else
             {
                 //actual execution to buy, limit
+                buyPriorityQueue.push(&pendingOrders.front());
             }
             executed.push_back(pendingOrders.front());
             //maybe save info like time of execution?
-			pendingOrdersMap.erase(pendingOrders.front().orderId);
+			pendingOrdersMap.erase(pendingOrders.front().getOrderId());
             pendingOrders.pop();
         }
         if(!(pendingOrders.front().getIsBuy()==Order::IsBuy::Sell) || (pendingOrders.front().getIsBuy()==Order::IsBuy::LimitSell && pendingOrders.front().getPrice()==2/*price to buy/sell at specified by isLimit order, not sure if this is should be in  order class or here*/))
@@ -46,10 +48,11 @@ void OrderBook::executeTrades() {
             else
             {
                 //actual execution to sell, limit
+                sellPriorityQueue.push(&pendingOrders.front());
             }
             executed.push_back(pendingOrders.front());
             //maybe save info like time of execution?
-			pendingOrdersMap.erase(pendingOrders.front().orderId);
+			pendingOrdersMap.erase(pendingOrders.front().getOrderId());
             pendingOrders.pop();
         }
     }
@@ -69,10 +72,55 @@ void OrderBook::findOrderinBook(Order& order) {
     }
 }
 
-void OrderBook::findOrderInBookByOrderId(int orderId) {
-    
+// SORT FUNCTION FOR ITERATION BY PRICE
+struct OrderComparator {
+    bool operator()(Order& a, Order& b) {
+        return a.getPrice() > b.getPrice(); // Compare prices in ascending order
+    }
+};
+
+std::queue<Order> sortByPrice(const std::queue<Order>& pendingOrders) {
+    std::priority_queue<Order, std::vector<Order>, OrderComparator> pq;
+
+    std::queue<Order> tempQueue = pendingOrders;
+    while (!tempQueue.empty()) {
+        pq.push(tempQueue.front());
+        tempQueue.pop();
+    }
+
+    std::queue<Order> sortedPricePendingOrders;
+    while (!pq.empty()) {
+        sortedPricePendingOrders.push(pq.top());
+        pq.pop();
+    }
+
+    return sortedPricePendingOrders;
 }
 
+//CONSTANT LOOKUP BY ORDER ID
+Order* OrderBook::findOrderInBookByOrderId(int orderId) {
+    auto it = pendingOrdersMap.find(orderId);
+    if (it != pendingOrdersMap.end()) {
+        return it->second;
+    } else {
+        
+    }
+}
+
+//CONSTANT FIND BEST BID AND ASK OF LIMIT ORDERS
+Order* OrderBook::findLowestSell() {
+    if (!sellPriorityQueue.empty()) {
+        return sellPriorityQueue.top();
+    }
+    return nullptr;
+}
+
+Order* OrderBook::findHighestBuy() {
+    if (!buyPriorityQueue.empty()) {
+        return buyPriorityQueue.top();
+    }
+    return nullptr;
+}
 
 uint64_t timeSinceEpochMillisec() {
   using namespace std::chrono;
@@ -108,7 +156,7 @@ void OrderBook::editOrder(int id, string ticker, string companyName, double pric
 			pendingOrdersMap[id]->setTicker(ticker);
 			pendingOrdersMap[id]->companyName = companyName;
 			pendingOrdersMap[id]->setPrice(price);
-			pendingOrdersMap[id]->setVolume(volume);
+			pendingOrdersMap[id]->setVolume(amount);
 			pendingOrdersMap[id]->setTimestamp(timeSinceEpochMillisec());
 		}
 	}

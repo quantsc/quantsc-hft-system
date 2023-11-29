@@ -34,7 +34,7 @@ class Order {
         int getUserId();
         std::string getTicker();
         IsBuy getIsBuy();
-        int getPrice();
+        int getPrice() const;
         int getVolume();
         int getTimestamp();
 
